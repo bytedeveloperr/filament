@@ -4,6 +4,7 @@ module filament::identity {
     use std::string::{Self, String};
     use sui::tx_context::{Self, TxContext};
     use sui::transfer;
+    use std::vector;
 
     use filament::nft;
 
@@ -42,7 +43,18 @@ module filament::identity {
         string::append(&mut key, value_str);
 
         
-        add<address, vector<String>>(identity, sender, value_str);
+        if(contains<address, vector<String>>(identity, sender)) {
+            let usernames = get_mut(identity, sender);
+            vector::push_back(usernames, value_str);
+
+            add<address, vector<String>>(identity, sender, *usernames);
+        } else {
+            let usernames = vector::empty<String>();
+            vector::push_back(&mut usernames, value_str);
+
+            add<address, vector<String>>(identity, sender, usernames);
+        };
+
         add<String, address>(identity, key, sender);
 
         let id_nft = nft::create_nft(value_str, logo, identity.platform, ctx);
@@ -52,7 +64,7 @@ module filament::identity {
 
     // dynamic object interaction functions
 
-    fun contains<K: copy + drop + store>(identity: &Identity, key: K): bool {
+    fun contains<K: copy + drop + store, V: store>(identity: &Identity, key: K): bool {
         field::exists_(&identity.id, key)
     }
 
