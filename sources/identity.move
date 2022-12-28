@@ -33,19 +33,12 @@ module filament::identity {
     }
 
     public entry fun link_identity(identity: &mut Identity, value: vector<u8>, logo: vector<u8>, ctx: &mut TxContext) {
-        let sender = tx_context::sender(ctx);
-
-
-    
+        let sender = tx_context::sender(ctx);    
         let value_str = string::utf8(value);
 
-
-        
         if(contains<address, vector<String>>(identity, sender)) {
             let usernames = get_mut(identity, sender);
             vector::push_back(usernames, value_str);
-
-            add<address, vector<String>>(identity, sender, *usernames);
         } else {
             let usernames = vector::empty<String>();
             vector::push_back(&mut usernames, value_str);
@@ -63,9 +56,7 @@ module filament::identity {
         transfer::transfer(id_nft, sender);
     }
 
-
-    // dynamic object interaction functions
-
+    // dynamic fields interaction functions
     fun contains<K: copy + drop + store, V: store>(identity: &Identity, key: K): bool {
         field::exists_(&identity.id, key)
     }
