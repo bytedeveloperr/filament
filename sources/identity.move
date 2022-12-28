@@ -34,19 +34,23 @@ module filament::identity {
     public entry fun link_identity(identity: &mut Identity, value: vector<u8>, logo: vector<u8>, ctx: &mut TxContext) {
         let sender = tx_context::sender(ctx);
 
-        assert!(!contains<address>(identity, sender), EIdentityAlreadyExists);
+        // assert!(!contains<address>(identity, sender), EIdentityAlreadyExists);
 
+    
         let value_str = string::utf8(value);
-        let key = string::utf8(IDENTITY_KEY);
+        let key = string::utf8(USERNAME_KEY);
         string::append(&mut key, value_str);
 
-        add<address, String>(identity, sender, value_str);
+        
+        add<address, vector<String>>(identity, sender, value_str);
         add<String, address>(identity, key, sender);
 
         let id_nft = nft::create_nft(value_str, logo, identity.platform, ctx);
         transfer::transfer(id_nft, sender);
     }
 
+
+    // dynamic object interaction functions
 
     fun contains<K: copy + drop + store>(identity: &Identity, key: K): bool {
         field::exists_(&identity.id, key)
@@ -55,5 +59,13 @@ module filament::identity {
     fun add<K: copy + drop + store, V: store>(identity: &mut Identity, key: K, value: V) {
         field::add(&mut identity.id, key, value);
         identity.size = identity.size + 1;
+    }
+
+    fun get<K: copy + drop + store, V: store>(identity: &Identity, key: K): &V {
+        field::borrow(&identity.id, key)
+    }
+
+    fun get_mut<K: copy + drop + store, V: store>(identity: &mut Identity, key: K): &mut V {
+        field::borrow_mut(&mut identity.id, key)
     }
 }
