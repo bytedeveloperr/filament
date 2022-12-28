@@ -13,7 +13,8 @@ module filament::identity {
         size: u64,
     }
 
-    const IDENTITY_KEY: vector<u8> = b"id_";
+    const USERNAME_KEY: vector<u8> = b"uk_";
+    const DEFAULT_KEY: vector<u8> = b"dk_";
 
     const EIdentityAlreadyExists: u64 = 0;
 
@@ -30,7 +31,7 @@ module filament::identity {
         }
     }
 
-    public entry fun add_identity(identity: &mut Identity, value: vector<u8>, logo: vector<u8>, ctx: &mut TxContext) {
+    public entry fun link_identity(identity: &mut Identity, value: vector<u8>, logo: vector<u8>, ctx: &mut TxContext) {
         let sender = tx_context::sender(ctx);
 
         assert!(!contains<address>(identity, sender), EIdentityAlreadyExists);
