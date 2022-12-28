@@ -35,12 +35,10 @@ module filament::identity {
     public entry fun link_identity(identity: &mut Identity, value: vector<u8>, logo: vector<u8>, ctx: &mut TxContext) {
         let sender = tx_context::sender(ctx);
 
-        // assert!(!contains<address>(identity, sender), EIdentityAlreadyExists);
 
     
         let value_str = string::utf8(value);
-        let key = string::utf8(USERNAME_KEY);
-        string::append(&mut key, value_str);
+
 
         
         if(contains<address, vector<String>>(identity, sender)) {
@@ -55,7 +53,11 @@ module filament::identity {
             add<address, vector<String>>(identity, sender, usernames);
         };
 
-        add<String, address>(identity, key, sender);
+        let username_key = string::utf8(USERNAME_KEY);
+        string::append(&mut username_key, value_str);
+
+        assert!(!contains<String, address>(identity, username_key), EIdentityAlreadyExists);
+        add<String, address>(identity, username_key, sender);
 
         let id_nft = nft::create_nft(value_str, logo, identity.platform, ctx);
         transfer::transfer(id_nft, sender);
